@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/fontawesome-free-5.13.0-web/css/all.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min(2).css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/all.css}">
+    <script type="text/javascript" th:src="@{/js/jquery-3.4.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/popper.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+
+    <script type="text/javascript" th:src="@{/js/math.js}"></script>
+
+    <!--vue所需文件-->
+    <script type="text/javascript" th:src="@{/js/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+
+    <script type="text/javascript" th:src="@{/js/echarts.js}"></script>
+    <script type="text/javascript" th:src="@{/js/vue-echarts@4.0.js}"></script>
+
+</head>
+<body>
+<div id="app">
+    <v-chart :options="barOptions" autoresize theme="light"></v-chart>
+</div>
+
+
+</body>
+<script>
+
+
+    var app;
+    app = new Vue({
+        el: '#app',
+        components: {
+            'v-chart': VueECharts,
+        },
+        data() {
+            return {
+                barOptions:{
+                    xAxis: {
+                        type: 'category',
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        type: 'line'
+                    }]
+                },
+                username:"roaringwild"
+            }
+
+        }
+    })
+</script>
+</html>

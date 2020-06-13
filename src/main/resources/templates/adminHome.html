@@ -1,0 +1,650 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>AdminHome</title>
+    <link rel="stylesheet" href="/css/fontawesome-free-5.13.0-web/css/all.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min(2).css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/all.css}">
+    <script type="text/javascript" th:src="@{/js/jquery-3.4.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/popper.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+
+    <script type="text/javascript" th:src="@{/js/math.js}"></script>
+
+    <!--vue所需文件-->
+    <script type="text/javascript" th:src="@{/js/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+
+
+    <style type="text/css">
+
+        table tbody {
+            display:block;
+            height:700px;
+            overflow-y:scroll;
+        }
+        table thead, tbody tr {
+            display:table;
+            width:100%;
+            table-layout:fixed;
+        }
+        a{
+            font-size: 18px;
+            font-family: 微软雅黑;
+        }
+    </style>
+</head>
+<body style="background-color: rgb(249, 248, 252);height:1017px">
+<div id="app">
+
+    <form id="userForm" hidden="hidden">
+        <input type="hidden" id="mid" th:value="${mid}">
+        <input type="hidden" id="user_id" name="id" th:value="${user.id}">
+        <input type="hidden" name="username" th:value="${user.username}">
+        <input type="hidden" name="sex" th:value="${user.sex}">
+        <input type="hidden" name="phone" th:value="${user.phone}">
+        <input type="hidden" name="imgPath" th:value="${user.imgPath}">
+    </form>
+
+
+    <!--导航条-->
+    <!--导航条-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: 60px;top: 0;position: sticky">
+        <img src="/logo.png">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div v-if="showUser" style="width: 100%">
+            <div class="nav-item dropdown" style="float: right">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false" style="color: white">
+                    {{user.username}}
+                </a>
+                <div class="dropdown-menu" style="background-color: #2b2a2a">
+                    <a style="margin-left: 25px;color: lawngreen" href="/logout">
+                        <i style="color: orange"  class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+            <img :src="user.imgPath" style="float: right;width: 40px;height: 40px">
+        </div>
+    </nav>
+
+    <div style="display: flex;width: 100%;height: 100%;overflow-y: scroll">
+
+        <!--垂直导航条-->
+        <nav v-if="showUser" class="navbar navbar-expand-lg navbar-dark bg-primary" style="width: 240px;height: 100%;display: block;color: white;top: 0;position: sticky">
+            <ul class="navbar-nav mr-auto btn-group-vertical"  style="text-align: left;display: inline-block">
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item1" href="#collapse1"><h6>用户管理</h6></a>
+                    <ul class="list-unstyled" data-parent="#item1" id="collapse1">
+                        <li><a v-on:click="choose(1)"><i class="fas fa-users"></i> 用户列表 </a></li>
+                        <li><a v-on:click="choose(2)"><i class="fas fa-user-plus"></i> 添加用户</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item2" href="#collapse2"><h6>门店管理</h6> </a>
+                    <ul class="list-unstyled" data-parent="#item2" id="collapse2">
+                        <li><a  v-on:click="choose(3)"><i class="far fa-calendar-alt"></i> 门店列表</a></li>
+                        <li><a  v-on:click="choose(4)"><i class="fas fa-plus"></i> 添加门店</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" id="item3" href="#collapse3"><h6>库存管理</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item3" id="collapse3">
+                        <li><a  v-on:click="choose(5)"><i class="fas fa-store"></i> 商品列表</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" id="item5" href="#collapse5"><h6>订单管理</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item3" id="collapse5">
+                        <li><a  v-on:click="choose(6)"><i class="fas fa-user-cog"></i> 订单列表</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" id="item9" href="#collapse9"><h6>个人信息</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item3" id="collapse9">
+                        <li><a  v-on:click="choose(9)"><i class="fas fa-user-cog"></i> 查看信息</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+
+        <!--用户列表-->
+        <div v-if="type==1" class="container" style="margin-top: 20px;max-width: 960px; display: inline-block">
+            <!--用户列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">用户列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor03">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="用户名" v-model="s_username">
+                        <input class="form-control mr-sm-2" type="text" placeholder="电话" v-model="s_phone">
+                    </form>
+                </div>
+            </nav>
+            <table class="table table-hover">
+                <thead style="text-align: center" class="table-primary">
+                <tr style="text-align: center">
+                    <th scope="col">用户名</th>
+                    <th scope="col">性别</th>
+                    <th scope="col">电话</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center">
+                <tr v-for="user in userListFilter" class="table-light">
+                    <th scope="row">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" :id="user.username+user.id">{{user.username}} <span class="caret"></span></a>
+                        <div class="dropdown-menu" :aria-labelledby="user.username+user.id">
+                            <a class="dropdown-item text-success" v-on:click="findUserShop(user.username)" >查看用户所有门店</a>
+                        </div>
+                    </th>
+                    <th scope="row">{{user.sex}}</th>
+                    <th scope="row">{{user.phone}}</th>
+                    <th scope="row">
+                        <button type="button" class="btn btn-link text-success" v-on:click="resetPwd(user.id)">重置密码</button>&nbsp;
+                        <span v-for="(user2,index) in userList">
+                        <button v-if="user2.id==user.id" type="button" class="btn btn-link text-success" v-on:click="deleteUser(user.id,index,2)">删除用户</button>&nbsp;
+                        <button v-if="user2.id==user.id" data-toggle="modal" data-target="#myModal" v-on:click="updateUser(user.id,index)" class="btn btn-link text-success">
+                            修改用户
+                        </button>
+                    </span>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--添加用户-->
+        <div v-if="type==2" class="container" style="margin-top: 100px;width: 880px; display: inline-block">
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);
+            position: relative;border-radius:3px;margin: 0 auto">
+                <div class="card-header card text-white bg-primary mb-3">
+                    <h5> 添加用户</h5>
+                </div>
+                <div class="card-body" style="height: auto;margin-bottom: 15px">
+                    <form id="addUserForm" style="width: 100%;height: auto;margin-bottom: 15px">
+                        <fieldset>
+                            <div class="form-group">
+                                <label for="username">用户名：</label>
+                                <input name="username" type="email" class="form-control" id="username" aria-describedby="emailHelp" placeholder="username" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">密码：</label>
+                                <input name="password" type="password" class="form-control" id="password" placeholder="Password" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label for="sex">性别：</label>
+                                <select class="form-control" id="sex" name="sex" style="width: 100%;height: 48px">
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话：</label>
+                                <input name="phone" type="email" class="form-control" id="phone" placeholder="phone" style="width: 100%;height: 48px">
+                            </div>
+                            <button type="button" v-on:click="addUser()" class="btn btn-primary" style="width: 300px;height: 48px">提交</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--门店列表-->
+        <div v-if="type==3" class="container" style="margin-top: 20px;max-width: 960px; display: inline-block">
+            <!--用户列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">门店列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor04" aria-controls="navbarColor04" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor04">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="店名" v-model="shop_name">
+                        <input class="form-control mr-sm-2" type="text" placeholder="店主" v-model="shop_master">
+                        <input class="form-control mr-sm-2" type="text" placeholder="地址" v-model="shop_address">
+                    </form>
+                </div>
+            </nav>
+            <table class="table table-hover">
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">门店名</th>
+                    <th scope="col">店主</th>
+                    <th scope="col">电话</th>
+                    <th scope="col">地址</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody v-if='shopList.length'  style="text-align: center">
+                <tr v-for="shop in shopListFilter" class="table-light">
+                    <th scope="row">{{shop.username}}</th>
+                    <th scope="row">{{shop.shopInformation.master.username}}</th>
+                    <th scope="row">{{shop.phone}}</th>
+                    <th scope="row">{{shop.shopInformation.address}}</th>
+                    <th scope="row">
+                    <span v-for="(shop2,index) in shopList">
+                        <button v-if="shop2.id==shop.id" type="button" class="btn btn-link text-success" v-on:click="deleteUser(shop.id,index,3)">删除用户</button>&nbsp;
+                    </span>
+
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--添加门店-->
+        <div v-if="type==4" class="container" style="width: 880px; display: inline-block">
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);
+            position: relative;border-radius:3px;margin: 0 auto">
+                <div class="card-header card text-white bg-primary mb-3">
+                    <h5>添加门店 </h5>
+                </div>
+                <div class="card-body">
+                    <form id="addShopForm" style="width: 100%;height: auto;margin-bottom: 15px">
+                        <fieldset>
+                            <legend>添加门店</legend>
+                            <div class="form-group">
+                                <label for="username">用户名：</label>
+                                <input name="username" type="text" class="form-control" id="shop_name" aria-describedby="emailHelp" placeholder="username" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">密码：</label>
+                                <input name="password" type="password" class="form-control" id="password2" placeholder="Password" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label for="sex">性别：</label>
+                                <select class="form-control" id="sex2" name="sex" style="width: 100%;height: 48px">
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">电话：</label>
+                                <input name="phone" type="text" class="form-control" id="phone2" placeholder="phone" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label for="master">店主：</label>
+                                <input name="master" type="text" class="form-control" id="master" placeholder="店主" list="masterList" style="width: 100%;height: 48px">
+                                <p v-if="errorFlag==1" class="text-danger">该用户不存在，请输入已存在用户</p>
+                                <datalist id="masterList">
+                                    <option v-for="master in userList" :value="master.username">{{master.username}}</option>
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">地址：</label>
+                                <input name="address" type="text" class="form-control" id="address" placeholder="address" style="width: 100%;height: 48px">
+                            </div>
+                            <button type="button" v-on:click="addShop()" class="btn btn-primary" style="width: 300px;height: 48px">提交</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--商品列表-->
+        <div v-if="type==5" class="container" style="margin-top: 20px;max-width: 1300px; display: inline-block">
+            <!--列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">商品列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor05" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor05">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="商品名称" v-model="c_name">
+                        <input class="form-control mr-sm-2" type="text" placeholder="上架季度" v-model="season">
+                        <select class="form-control mr-sm-2" type="text" placeholder="商品类型" v-model="c_type">
+                            <option value="">无</option>
+                            <option v-for="t in typeList" :value="t">{{t}}</option>
+                        </select>
+                        <input class="form-control mr-sm-2" type="text" placeholder="所属用户" v-model="c_master">
+                    </form>
+                </div>
+            </nav>
+
+
+            <table class="table table-hover">
+
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">商品编号</th>
+                    <th scope="col" style="width: 400px;height: 80px">商品名称</th>
+                    <th scope="col">商品价格</th>
+                    <th scope="col">上架季度</th>
+                    <th scope="col">商品类型</th>
+                    <th scope="col">所属用户</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center">
+                <tr v-for="commodity in commodityListFilter" class="table-light">
+                    <th scope="row">{{commodity.id}}</th>
+                    <th scope="row" style="width: 400px;height: 80px">
+                        <img v-if="commodity.imgPath!=null" :src="commodity.imgPath" width="50" height="50">
+                        <img v-else src="/commodity/noImg.jpg" width="50" height="50">
+                        {{commodity.c_name}}</th>
+                    <th scope="row">{{commodity.price}}</th>
+                    <th scope="row">{{commodity.season}}</th>
+                    <th scope="row">{{commodity.type}}</th>
+                    <th scope="row">
+                        <span v-if="commodity.master==null">无</span>
+                        <span v-else>{{commodity.master.username}}</span>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--订单列表-->
+        <div v-if="type==6" class="container" style="margin-top: 20px;max-width: 1200px; display: inline-block">
+            <!--列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">订单列表</a>
+
+                <form class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="text" placeholder="订单编号" v-model="o_id">
+                    <input class="form-control mr-sm-2" type="text" placeholder="交易时间" v-model="o_date">
+                    <input class="form-control mr-sm-2" type="text" placeholder="卖家" v-model="o_master">
+                    <input class="form-control mr-sm-2" type="text" placeholder="买家" v-model="customer">
+                </form>
+            </nav>
+            <table class="table table-hover">
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">订单编号</th>
+                    <th scope="col">订单详情</th>
+                    <th scope="col">所属用户</th>
+                    <th scope="col">订单价格</th>
+                    <th scope="col">交易时间</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center">
+                <tr v-for="(order,index) in orderListFilter" class="table-light">
+                    <th scope="row">{{order.id}}</th>
+                    <th scope="row">
+                        <button type="button" class="btn btn-link text-success" data-toggle="modal" data-target="#myModal2" v-on:click="getDetail(index)">
+                            查看订单详情
+                        </button>
+                    </th>
+                    <th scope="row">{{order.master.username}}</th>
+                    <th scope="row">{{order.price}}</th>
+                    <th scope="row">{{order.date}}</th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--修改用户模态框-->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">修改用户信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="updateUserForm">
+                            <fieldset>
+                                <input type="hidden" name="id" id="u_id">
+                                <div class="form-group">
+                                    <label for="username">用户名：</label>
+                                    <input readonly="readonly" name="username" id="u_username" type="email" class="form-control"
+                                           aria-describedby="emailHelp" placeholder="username" style="width: 300px;height: 48px">
+                                </div>
+                                <div class="form-group">
+                                    <label>性别：</label>
+                                    <select id="u_sex2" class="form-control" name="sex" style="width: 300px;height: 48px" >
+                                        <option value="男">男</option>
+                                        <option value="女">女</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">电话：</label>
+                                    <input name="phone" type="email" class="form-control"  placeholder="phone" id="u_phone" style="width: 300px;height: 48px">
+                                </div>
+                            </fieldset>
+                        </form>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button id="updateUserBtn" type="button" class="btn btn-primary" v-on:click="submitUpdateUser(Ind)" style="width: 300px;height: 48px">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--订单详情页面-->
+        <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div style="max-width:960px" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">订单详情</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" v-if="detail">
+                        <p>订单编号：{{detail.id}} &nbsp; &nbsp; &nbsp;交易时间：{{detail.date}}</p>
+                        <p>卖家：{{detail.master.username}} &nbsp; &nbsp; &nbsp;买家：{{detail.customer.name}}</p>
+
+                        <legend>订单商品：</legend>
+                        <div style="height:250px;overflow-y:scroll;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">商品名称</th>
+                                    <th scope="col">码数</th>
+                                    <th scope="col">数量</th>
+                                    <th scope="col">价格</th>
+                                </tr>
+                                </thead>
+                                <tbody style="overflow-y: scroll">
+                                <tr v-for="commodity in commodityList" style="text-align: center">
+                                    <th scope="row">
+                                        <img v-if="commodity.imgPath!=null" :src="commodity.imgPath" width="50" height="50">
+                                        <img v-else src="/commodity/noImg.jpg" width="50" height="50">
+                                        {{commodity.c_name}}
+                                    </th>
+                                    <th scope="row">{{commodity.size}}</th>
+                                    <th scope="row">{{commodity.quantity}}</th>
+                                    <td scope="row">{{commodity.price}}￥</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <legend>订单活动：</legend>
+                        <div style="height:250px;overflow-y:scroll;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">活动编号</th>
+                                    <th scope="col">活动内容</th>
+                                    <th scope="col">参与类型</th>
+                                    <th scope="col">参与季度</th>
+                                </tr>
+                                </thead>
+                                <tbody style="overflow-y: scroll">
+                                <tr v-for="activity in activityList" style="text-align: center">
+                                    <th scope="row">{{activity.id}}</th>
+                                    <th scope="row">
+                                <span v-if="activity.discount<1">{{activity.discount*100}}%
+                                    <span v-if="activity.overlay==1">可折上折 </span>
+                                </span>
+                                        <span v-else-if="activity.plan==2">
+                                    满&nbsp;{{Math.floor(activity.discount)}} &nbsp; 减 &nbsp;
+                                    {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),Math.floor(activity.discount))}}
+                                    <span v-if="activity.overlay==1">上不封顶</span>
+                                </span>
+                                        <span v-else-if="activity.plan==3">
+                                    满{{Math.floor(activity.discount)}} &nbsp;
+                                    {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),100)}}%
+                                    <span v-if="activity.overlay==1">可折上折 </span>
+                                </span>
+                                    </th>
+                                    <th scope="row">
+                                        <select v-if="activity.typeJson" multiple="" class="form-control" style="width: 80px;height: 30px">
+                                            <option v-for="t in activity.typeJson">{{t}}</option>
+                                        </select>
+                                        <span v-else>全部类型</span>
+                                    </th>
+                                    <th scope="row">
+                                        <select v-if="activity.seasonJson" multiple="" class="form-control" style="width: 80px;height: 30px">
+                                            <option v-for="s in activity.seasonJson">{{s}}</option>
+                                        </select>
+                                        <span v-else>全部季度</span>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer" v-if="detail">
+                        <p style="float: right">订单原价：{{detail_price}}</p><br>
+                        <p style="float: right" class="text-danger">
+                            优惠:
+                            <span v-if="detail.price==detail_price">无</span>
+                            <span v-else>
+                            {{NumberSub(detail_price,detail.price)}}
+                        </span>
+                        </p><br>
+                        <p><hr></p><br>
+                        <p style="float: right" class="text-info">实际价格：{{detail.price}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--个人信息-->
+        <div v-if="type==9&&showUser" class="container" style="margin-top: 20px;max-width: 960px; display: inline-block">
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;margin-top: 1.25rem;height: 230px">
+                <div class="card-body">
+                    <h4 class="card-title">基础信息</h4>
+                    <div style="display: inline-flex">
+                        <img th:src="${user.imgPath}" style="height: 100px;height: 100px">
+                    </div>
+                    <div style="display: inline-block;margin-left: 20px">
+                        <form id="updateUsernameForm">
+                            <input type="hidden" name="id" :value="user.id">
+                            <h5 class="card-subtitle mb-2 text-muted">username:</h5>
+                            <div class="card-text">
+                                <input v-if="usernameFlag" name="username" :value="user.username" style="height: 36px;width: 300px;">
+                                <span v-else="usernameFlag" style="font-size: 36px" >{{user.username}}</span>
+                                <button v-if="usernameFlag" type="button" class="btn btn-primary" v-on:click="updateUsername()">修改名称</button>
+                            </div>
+                        </form>
+
+                        <button type="button" class="btn btn-link text-info" v-on:click="editUsernameForm()" ><i class="fas fa-edit"></i>更改名称</button>
+                        <button type="button" class="btn btn-link text-info" data-toggle="modal" data-target="#myModal4"><i class="fas fa-user-edit"></i>更换头像</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin-top: 1.25rem;height: auto">
+                <div style="height: 60px">
+                    <h4 class="card-title" style="display:inline-block;margin: 25px;padding-left: 8px">其他信息</h4>
+                    <button class="btn btn-primary" style="float: right;height: 48px;width: 150px;display:inline-block;margin: 25px" v-on:click="editOther()">
+                        修改信息
+                    </button>
+                </div>
+                <div class="card-body" style="margin-bottom: 10px">
+                    <form id="otherInfoForm">
+                        <input type="hidden" name="id" :value="user.id">
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">sex</h5>
+                            <select v-if="otherInfoFlag" class="form-control" name="sex" :value="user.sex" style="height: 48px;width: 300px;" >
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                            <span v-else style="font-size: 24px">{{user.sex}}</span>
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">phone</h5>
+                            <input v-if="otherInfoFlag" type="text" class="form-control" name="phone" :value="user.phone" style="height: 36px;width: 300px;">
+                            <span v-else style="font-size: 24px">{{user.phone}}</span>
+                        </div>
+                        <button v-if="otherInfoFlag" style="height: 46px;width: 300px;" class="btn btn-primary" v-on:click="updateOther()">提交</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin-top: 1.25rem; height: auto">
+                <h4 class="card-title" style="display:inline-block;margin: 25px;padding-left: 8px">安全信息</h4>
+                <div class="card-body" style="margin-bottom: 10px">
+                    <form v-if="securityFlag" id="updatePasswordForm">
+                        <input type="hidden" name="id" :value="user.id">
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">原始密码：</h5>
+                            <input type="password" name="old_password" class="form-control" style="height: 36px;width: 300px;">
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">新密码：</h5>
+                            <input type="password" name="password" class="form-control" style="height: 36px;width: 300px;">
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">重复密码：</h5>
+                            <input type="password" name="re_password" class="form-control" style="height: 36px;width: 300px;">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="button" style="width: 300px;height: 46px;" v-on:click="updatePassword()">提交</button>
+                        </div>
+                    </form>
+                    <button v-else class="btn btn-primary" style="width: 150px;height: 48px;" v-on:click="editPassword()">修改密码</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--修改头像模态框-->
+    <div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改用户信息</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/admin/uploadIcon" method="post" enctype="multipart/form-data">
+                        <fieldset>
+                            <input type="hidden" name="id" th:value="${user.id}">
+                            <div class="form-group">
+                                <label for="exampleInputFile">上传头像</label>
+                                <input type="file" class="form-control-file" id="exampleInputFile" aria-describedby="fileHelp" name="file">
+                            </div>
+                        </fieldset>
+                        <input class="btn btn-primary" type="submit" value="提交" style="height: 48px;width: 300px">
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+
+
+</body>
+
+<script type="text/javascript" th:src="@{/js/admin.js}"></script>
+
+</html>

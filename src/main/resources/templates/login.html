@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>LOGIN</title>
+    <link rel="stylesheet" type="text/css" th:href="@{css/bootstrap.min(2).css}">
+
+</head>
+<body>
+
+<!--导航条-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: 60px;top: 0;position: sticky">
+    <img src="/logo.png">
+</nav>
+
+<!--登录表单-->
+<div style="margin:0 auto;width: 300px;margin-top: 200px;">
+    <form id="loginform" action="/login" method="post">
+        <fieldset>
+
+            <legend>用户登录</legend>
+
+            <p class="text-warning" th:if="${param.error!=null}">用户名或密码错误</p>
+            <p class="text-success" th:if="${param.logout!=null}">你已经成功登出</p>
+
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" width="300px" height="48px">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" width="300px" height="48px">
+            </div>
+            <button type="submit" class="btn btn-lg btn-primary btn-block" width="300px" height="48px">Login</button>
+        </fieldset>
+    </form>
+
+    <p class="mt-5 mb-3 text-muted">© 2020-2090</p>
+</div>
+
+</body>
+</html>

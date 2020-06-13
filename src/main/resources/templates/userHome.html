@@ -1,0 +1,934 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>UserHome</title>
+    <link rel="stylesheet" href="/css/fontawesome-free-5.13.0-web/css/all.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min(2).css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/all.css}">
+    <script type="text/javascript" th:src="@{/js/jquery-3.4.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/popper.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+
+    <script type="text/javascript" th:src="@{/js/math.js}"></script>
+
+    <!--vue所需文件-->
+    <script type="text/javascript" th:src="@{/js/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+
+    <script type="text/javascript" th:src="@{/js/echarts.js}"></script>
+    <script type="text/javascript" th:src="@{/js/vue-echarts@4.0.js}"></script>
+
+
+    <style type="text/css">
+        table tbody {
+            display:block;
+            height:700px;
+            overflow-y:scroll;
+        }
+        table thead, tbody tr {
+            display:table;
+            width:100%;
+            table-layout:fixed;
+        }
+        a{
+            font-size: 18px;
+            font-family: 微软雅黑;
+        }
+    </style>
+</head>
+<body style="background-color: rgb(249, 248, 252);height:1017px">
+<div id="app">
+
+    <form id="userForm" hidden="hidden">
+        <input type="hidden" name="id" th:value="${user.id}">
+        <input type="hidden" name="username" th:value="${user.username}">
+        <input type="hidden" name="sex" th:value="${user.sex}">
+        <input type="hidden" name="phone" th:value="${user.phone}">
+        <input type="hidden" name="imgPath" th:value="${user.imgPath}">
+    </form>
+    <input type="hidden" th:value="${user.id}" id="user_id">
+
+    <!--导航条-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: 60px;top: 0;position: sticky">
+        <img src="/logo.png">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div v-if="showUser" style="width: 100%">
+            <div class="nav-item dropdown" style="float: right">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false" style="color: white">
+                    {{user.username}}
+                </a>
+                <div class="dropdown-menu" style="background-color: #2b2a2a">
+                    <a style="margin-left: 25px;color: lawngreen" href="/logout">
+                        <i style="color: orange"  class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+            <img :src="user.imgPath" style="float: right;width: 40px;height: 40px">
+        </div>
+    </nav>
+
+    <div style="display: flex;width: 100%;height: 100%;overflow-y: scroll">
+
+        <!--垂直导航条-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="width: 240px;height: 100%;display: block;color: white;top: 0;position: sticky">
+
+            <ul class="navbar-nav mr-auto btn-group-vertical"  style="text-align: left;display: inline-block">
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item1" href="#collapse1"><h6>顾客管理</h6></a>
+                    <ul class="list-unstyled" data-parent="#item1" id="collapse1">
+                        <li><a v-on:click="choose(1)"><i class="fas fa-users"></i> 顾客列表 </a></li>
+                        <li><a v-on:click="choose(2)"><i class="fas fa-user-plus"></i> 添加顾客</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item6" href="#collapse6"><h6>门店管理</h6></a>
+                    <ul class="list-unstyled" data-parent="#item1" id="collapse6">
+                        <li><a v-on:click="choose(10)"><i class="fas fa-users"></i> 门店列表 </a></li>
+                        <li><a v-on:click="choose(11)"><i class="fas fa-user-plus"></i> 添加门店</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item2" href="#collapse2"><h6>活动策划</h6> </a>
+                    <ul class="list-unstyled" data-parent="#item2" id="collapse2">
+                        <li><a  v-on:click="choose(3)"><i class="far fa-calendar-alt"></i> 活动列表</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" id="item4" href="#collapse4"><h6>订单管理</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item4" id="collapse4">
+                        <li><a  v-on:click="choose(7)"><i class="fas fa-th-list"></i> 订单列表</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" id="item3" href="#collapse3"><h6>商品管理</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item3" id="collapse3">
+                        <li><a  v-on:click="choose(5)"><i class="fas fa-store"></i> 商品列表</a></li>
+                        <li><a  v-on:click="choose(6)"><i class="fas fa-luggage-cart"></i> 添加商品</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" data-toggle="collapse" id="item5" href="#collapse5"><h6>个人信息</h6> <span class="sr-only">(current)</span></a>
+                    <ul class="list-unstyled" data-parent="#item3" id="collapse5">
+                        <li><a  v-on:click="choose(9)"><i class="fas fa-user-cog"></i> 查看信息</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+        </nav>
+
+
+
+        <!--客户列表-->
+        <div v-if="type==1" class="container" style="margin-top: 20px;width: 880px; display: inline-block">
+            <!--用户列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">顾客列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor03">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="顾客名称" v-model="customer_name">
+                        <input class="form-control mr-sm-2" type="text" placeholder="联系方式" v-model="customer_phone">
+                        <select class="form-control mr-sm-2" type="text" placeholder="会员等级" v-model="customer_membership">
+                            <option value="-1">----</option>
+                            <option value="1">NOT VIP</option>
+                            <option value="0.9">VIP</option>
+                            <option value="0.85">HVIP</option>
+                            <option value="0.8">SVIP</option>
+                        </select>
+                    </form>
+                </div>
+            </nav>
+
+
+            <table class="table table-hover">
+
+                <thead style="text-align: center">
+                <tr class="table-primary" style="text-align: center">
+                    <th scope="col">顾客名称</th>
+                    <th scope="col">会员等级</th>
+                    <th scope="col">联系方式</th>
+                    <th scope="col">累计消费</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center">
+                <tr v-for="customer in customerListFilter" class="table-light">
+                    <th scope="row">{{customer.customer_name}}<span class="caret"></span></th>
+                    <th>
+                        <span v-if="customer.membership==1">NOT VIP</span>
+                        <span v-if="customer.membership==0.9">VIP</span>
+                        <span v-if="customer.membership==0.85">HVIP</span>
+                        <span v-if="customer.membership==0.8">SVIP</span>
+                    </th>
+                    <th>{{customer.phone}}</th>
+                    <th>{{customer.consumption}}</th>
+                    <th>
+                        <button v-for="(cus,index) in customerList" type="button" v-if="cus.id==customer.id"
+                                data-toggle="modal" data-target="#myModal" v-on:click="updateCustomer(customer.id,index)" class="btn btn-link">
+                            修改顾客信息
+                        </button>&nbsp;
+                    </th>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--添加顾客-->
+        <div v-if="type==2" class="container" style="margin-top: 20px;width: 880px; display: inline-block">
+            <div class="card" style="width: 720px;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin: 0 auto;height:auto;max-height: 900px">
+                <div class="card-header card text-white bg-primary mb-3">
+                    <h5> 添加顾客</h5>
+                </div>
+                <div class="card-body" style="width: 100%">
+                    <form id="customerForm" style="text-align: left;">
+                        <fieldset>
+                            <div class="form-group">
+                                <label for="customer_name">顾客名称：</label>
+                                <input name="customer_name" type="text" id="customer_name" placeholder="name"  class="form-control" style="width: 100%; height: 48px;">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer_phone">联系方式：</label>
+                                <input name="phone" type="email" id="customer_phone" placeholder="phone" class="form-control" style=" width: 100%;height: 48px;">
+                            </div>
+                            <div class="form-group">
+                                <label for="membership">会员等级：</label>
+                                <select name="membership" type="email" id="membership" placeholder="membership" class="form-control" style=" width: 100%;height: 48px;" value="1">
+                                    <option value="1">NOT VIP</option>
+                                    <option value="0.9">VIP</option>
+                                    <option value="0.85">HVIP</option>
+                                    <option value="0.8">SVIP</option>
+                                </select>
+                            </div>
+                            <button type="button" width="300px" height="48px" class="btn btn-primary" style="width: 300px;height: 48px;" v-on:click="addCustomer()">提交</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--活动列表-->
+        <div v-if="type==3" class="container" style="margin-top: 20px;width: 880px; display: inline-block">
+            <!--活动列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">活动列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor04" aria-controls="navbarColor04" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor04">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="开始时间" v-model="activity_s_date">
+                        <input class="form-control mr-sm-2" type="text" placeholder="结束时间" v-model="activity_e_date">
+                    </form>
+                </div>
+            </nav>
+            <table class="table table-hover">
+                <thead style="text-align: center">
+                <tr class="table-primary" style="text-align: center">
+                    <th scope="col">活动编号</th>
+                    <th scope="col">活动方案</th>
+                    <th scope="col">参与类型</th>
+                    <th scope="col">参与季度</th>
+                    <th scope="col">起止时间</th>
+                    <th scope="col">店铺名称</th>
+                </tr>
+                </thead>
+                <tbody style="text-align: center">
+                <tr v-for="activity in activityListFilter" class="table-light">
+                    <th scope="row">{{activity.id}}</th>
+                    <th scope="row">
+                    <span v-if="activity.discount<1">
+                        {{activity.discount*100}}%
+                        <span v-if="activity.overlay==1">可折上折 </span>
+                    </span>
+                        <span v-else-if="activity.plan==2">
+                        满&nbsp;{{Math.floor(activity.discount)}} &nbsp; 减 &nbsp;
+                        {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),Math.floor(activity.discount))}}
+                        <span v-if="activity.overlay==1">上不封顶</span>
+                    </span>
+                        <span v-else-if="activity.plan==3">
+                        满{{Math.floor(activity.discount)}} &nbsp;
+                        {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),100)}}%
+                        <span v-if="activity.overlay==1">可折上折 </span>
+                    </span>
+                    </th>
+                    <th scope="row">
+                        <select v-if="activity.typeJson" class="form-control" >
+                            <option v-for="type in activity.typeJson">{{type}}</option>
+                        </select>
+                        <span v-else>全部类型</span>
+                    </th>
+                    <th scope="row">
+                        <select v-if="activity.seasonJson" class="form-control" >
+                            <option v-for="season in activity.seasonJson">{{season}}</option>
+                        </select>
+                        <span v-else>全部季度</span>
+                    </th>
+                    <th scope="row">{{activity.start_date}}----{{activity.end_date}}</th>
+                    <th scope="row">{{activity.shopName}}</th>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <!--商品列表-->
+        <div v-if="type==5" class="container" style="margin-top: 20px;max-width: 1000px; display: inline-block">
+            <!--列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">商品列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor05" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor05">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="商品名称" v-model="c_Name">
+                        <input class="form-control mr-sm-2" type="text" placeholder="上架季度" v-model="season">
+                        <select class="form-control mr-sm-2" type="text" placeholder="商品类型" v-model="c_type">
+                            <option value="">无</option>
+                            <option v-for="t in activity_typeList" :value="t">{{t}}</option>
+                        </select>
+                    </form>
+                </div>
+            </nav>
+            <table class="table table-hover">
+
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">商品名称</th>
+                    <th scope="col">商品价格</th>
+                    <th scope="col">上架季度</th>
+                    <th scope="col">商品类型</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center;overflow: auto">
+                <tr v-for="commodity in commodityListFilter" class="table-light">
+                    <th scope="row">
+                        <img v-if="commodity.imgPath!=null" :src="commodity.imgPath" width="50" height="50">
+                        <img v-else src="/commodity/noImg.jpg" width="50" height="50">
+                        {{commodity.c_name}}
+                    </th>
+                    <th scope="row">{{commodity.price}}</th>
+                    <th scope="row">{{commodity.season}}</th>
+                    <th scope="row">{{commodity.type}}</th>
+                    <th scope="row">
+                        <div v-for="(c,index) in commodityList">
+                            <button v-if="c.id==commodity.id" type="button" class="btn btn-link text-success"
+                                    data-toggle="modal" data-target="#myModal3" v-on:click="getCommodityInfo(index)">
+                                查看库存
+                            </button>&nbsp;
+                            <button v-if="c.id==commodity.id" type="button" class="btn btn-link text-success"
+                                    data-toggle="modal" data-target="#myModal6" v-on:click="getUpdateCommodity(index)">
+                                修改
+                            </button>&nbsp;
+                            <button v-if="c.id==commodity.id" type="button" class="btn btn-link text-success" v-on:click="deleteCommodity(index)">
+                                删除
+                            </button>
+                        </div>
+                    </th>
+
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <!--订单列表-->
+        <div v-if="type==7" class="container" style="margin-top: 20px;max-width: 1200px; display: inline-block">
+            <!--列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">订单列表</a>
+
+                <form class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="text" placeholder="订单编号" v-model="o_id">
+                    <input class="form-control mr-sm-2" type="text" placeholder="交易时间" v-model="o_date">
+                    <input class="form-control mr-sm-2" type="text" placeholder="交易店铺" v-model="o_master">
+                    <input class="form-control mr-sm-2" type="text" placeholder="顾客名称" v-model="customer">
+                </form>
+
+            </nav>
+
+
+            <table class="table table-hover">
+
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">订单编号</th>
+                    <th scope="col">订单详情</th>
+                    <th scope="col">交易店铺</th>
+                    <th scope="col">顾客名称</th>
+                    <th scope="col">交易金额</th>
+                    <th scope="col">交易时间</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody  style="text-align: center">
+                <tr v-for="order in orderListFilter" class="table-light">
+                    <th scope="row">{{order.id}}</th>
+                    <th scope="row">
+                        <button v-for="(o,index) in orderList" v-if="o.id==order.id" type="button" class="btn btn-link text-success" data-toggle="modal" data-target="#myModal2" v-on:click="getDetail(index)">
+                            查看订单详情
+                        </button>
+                    </th>
+                    <th scope="row">{{order.master.username}}</th>
+                    <th scope="row">{{order.customer.name}}</th>
+                    <th scope="row">{{order.price}}</th>
+                    <th scope="row">{{order.date}}</th>
+                    <th scope="row">
+                        <button v-for="(o,index) in orderList" v-if="o.id==order.id" type="button" class="btn btn-link text-success"  v-on:click="deleteOrder(index,order.id)">
+                            删除订单
+                        </button>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--添加商品-->
+        <div v-if="type==6" class="container" style="margin-top: 20px;width: 880px; display: inline-block">
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);
+            position: relative;border-radius:3px;margin-top: 1.25rem;height: auto">
+                <div class="card-header card text-white bg-primary mb-3">
+                    <h5> 添加商品</h5>
+                </div>
+                <div class="card-body" style="margin-bottom: 15px;width: 700px">
+                    <form id="commodityForm" style="text-align: left;margin-left: 150px;">
+                        <input type="hidden" name="mid" th:value="${user.id}">
+                        <fieldset>
+                            <div class="form-group">
+                                <label>商品名称:</label>
+                                <input type="text"  class="form-control" style="width: 100%;height: 48px" name="c_name">
+
+                            </div>
+                            <div class="form-group">
+                                <label>商品价格:</label>
+                                <input type="text"  class="form-control" style="width: 100%;height: 48px" name="price">
+                            </div>
+                            <div class="form-group">
+                                <label>商品类型：</label>
+                                <select  class="form-control" style="height: 48px;width: 100%;" name="type">
+                                    <option v-for="t in activity_typeList" :value="t">{{t}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>上架季度：</label>
+                                <select  class="form-control" style="height: 48px;width: 100%;" name="season">
+                                    <option v-for="season in activity_seasonList" :value="season">{{season}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>上传图片</label>
+                                <input type="file" class="form-control-file" aria-describedby="fileHelp" name="file" @change="getFile($event)">
+                            </div>
+                            <button type="button" width="300px" height="48px" class="btn btn-primary" style="width: 300px;height: 48px;" v-on:click="addCommodity()">提交</button>
+                        </fieldset>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!--门店列表-->
+        <div v-if="type==10" class="container" style="margin-top: 20px;width: 880px;">
+            <!--用户列表过滤-->
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">门店列表</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor04" aria-controls="navbarColor04" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="店名" v-model="shop_name">
+                        <input class="form-control mr-sm-2" type="text" placeholder="地址" v-model="shop_address">
+                    </form>
+                </div>
+            </nav>
+            <table class="table table-hover">
+                <thead style="text-align: center">
+                <tr style="text-align: center" class="table-primary">
+                    <th scope="col">门店名</th>
+                    <th scope="col">电话</th>
+                    <th scope="col">地址</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody v-if='shopList.length'  style="text-align: center">
+                <tr v-for="shop in shopListFilter" class="table-light">
+                    <th scope="row">{{shop.username}}</th>
+                    <th scope="row">{{shop.phone}}</th>
+                    <th scope="row">{{shop.address}}</th>
+                    <th scope="row">
+                    <span v-for="(shop2,index) in shopList">
+                        <button v-if="shop2.id==shop.id" type="button" class="text-success btn btn-link"
+                                data-toggle="modal" data-target="#myModal5" v-on:click="updateShop(index)">修改</button>&nbsp;
+                    </span>
+
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!--添加门店-->
+        <div v-if="type==11" class="container" style="margin-top: 20px;width: 880px;; display: inline-block">
+            <div class="card" style="width: 720px;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin: 0 auto;height:auto;max-height: 900px">
+                <div class="card-header card text-white bg-primary mb-3">
+                    <h5> 添加门店</h5>
+                </div>
+                <div class="card-body" style="width: 100%">
+                    <form id="addShopForm" style="text-align: left;width: 100%;">
+                        <input type="hidden" name="id" th:value="${user.id}">
+                        <fieldset>
+                            <div class="form-group">
+                                <label>店铺名称：</label>
+                                <input type="text"  class="form-control" style="width: 100%;height: 48px" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label>登录密码：</label>
+                                <input type="password"  class="form-control" style="width: 100%;height: 48px" name="password">
+                            </div>
+                            <div class="form-group">
+                                <label>性别：</label>
+                                <select  name="sex" class="form-control" style="height: 48px;width: 100%;">
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>联系方式：</label>
+                                <input name="phone" class="form-control" style="width: 100%;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label>店铺地址：</label>
+                                <input  name="address" class="form-control" style="width: 100%;height: 48px">
+                            </div>
+                            <button type="button" width="300px" height="48px" class="btn btn-primary" style="width: 300px;height: 48px;" v-on:click="addShop()">提交</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--个人信息-->
+        <div v-if="type==9&&showUser" class="container" style="margin-top: 20px;width: 880px; display: inline-block">
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;margin-top: 1.25rem;height: 230px">
+                <div class="card-body">
+                    <h4 class="card-title">基础信息</h4>
+                    <div style="display: inline-flex">
+                        <img th:src="${user.imgPath}" style="height: 100px;height: 100px">
+                    </div>
+                    <div style="display: inline-block;margin-left: 20px">
+                        <form id="updateUsernameForm">
+                            <input type="hidden" name="id" :value="user.id">
+                            <h5 class="card-subtitle mb-2 text-muted">username:</h5>
+                            <div class="card-text">
+                                <input v-if="usernameFlag" name="username" :value="user.username" style="height: 36px;width: 300px;">
+                                <span v-else="usernameFlag" style="font-size: 36px" >{{user.username}}</span>
+                                <button v-if="usernameFlag" type="button" class="btn btn-primary" v-on:click="updateUsername()">修改名称</button>
+                            </div>
+                        </form>
+
+                        <button type="button" class="btn btn-link text-info" v-on:click="editUsernameForm()" ><i class="fas fa-edit"></i>更改名称</button>
+                        <button type="button" class="btn btn-link text-info" data-toggle="modal" data-target="#myModal4"><i class="fas fa-user-edit"></i>更换头像</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin-top: 1.25rem;height: auto">
+                <div style="height: 60px">
+                    <h4 class="card-title" style="display:inline-block;margin: 25px;padding-left: 8px">其他信息</h4>
+                    <button class="btn btn-primary" style="float: right;height: 48px;width: 150px;display:inline-block;margin: 25px" v-on:click="editOther()">
+                        修改信息
+                    </button>
+                </div>
+                <div class="card-body" style="margin-bottom: 10px">
+                    <form id="otherInfoForm">
+                        <input type="hidden" name="id" :value="user.id">
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">sex</h5>
+                            <select v-if="otherInfoFlag" class="form-control" name="sex" :value="user.sex" style="height: 48px;width: 100%;" >
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                            <span v-else style="font-size: 24px">{{user.sex}}</span>
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">phone</h5>
+                            <input v-if="otherInfoFlag" type="text" class="form-control" name="phone" :value="user.phone" style="height: 36px;width: 100%;">
+                            <span v-else style="font-size: 24px">{{user.phone}}</span>
+                        </div>
+                        <button v-if="otherInfoFlag" style="height: 46px;width: 300px;" class="btn btn-primary" v-on:click="updateOther()">提交</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card" style="width: 100%;box-shadow: 0 0 0.25rem 0 rgba(111,117,135,.35);position: relative;border-radius:3px;
+            margin-top: 1.25rem; height: auto">
+                <h4 class="card-title" style="display:inline-block;margin: 25px;padding-left: 8px">安全信息</h4>
+                <div class="card-body" style="margin-bottom: 10px">
+                    <form v-if="securityFlag" id="updatePasswordForm">
+                        <input type="hidden" name="id" :value="user.id">
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">原始密码：</h5>
+                            <input type="password" name="old_password" class="form-control" style="height: 36px;width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">新密码：</h5>
+                            <input type="password" name="password" class="form-control" style="height: 36px;width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <h5 class="card-subtitle mb-2 text-muted">重复密码：</h5>
+                            <input type="password" name="re_password" class="form-control" style="height: 36px;width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="button" style="width: 300px;height: 46px;" v-on:click="updatePassword()">提交</button>
+                        </div>
+                    </form>
+                    <button v-else class="btn btn-primary" style="width: 150px;height: 48px;" v-on:click="editPassword()">修改密码</button>
+                </div>
+            </div>
+        </div>
+
+        <!--修改头像模态框-->
+        <div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">修改用户信息</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/user/uploadIcon" method="post" enctype="multipart/form-data">
+                        <fieldset>
+                            <input type="hidden" name="id" th:value="${user.id}">
+                            <div class="form-group">
+                                <label for="exampleInputFile">上传头像</label>
+                                <input type="file" class="form-control-file"  aria-describedby="fileHelp" name="file">
+                            </div>
+                        </fieldset>
+                        <input class="btn btn-primary" type="submit" value="提交" style="height: 48px;width: 300px">
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+        <!--修改店铺信息-->
+        <div class="modal fade" id="myModal5" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div style="max-width:600px" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="color: white;background-color: #8a58d6">
+                        <h5 class="modal-title">修改店铺信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="text-align: center">
+                        <form id="updateShopForm" style="text-align: left;display: inline-grid">
+
+                            <div class="form-group">
+                                <label>店铺名称：</label>
+                                <input type="text" id="shopName" class="form-control" style="width: 300px;height: 48px" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label>性别：</label>
+                                <select id="shopSex" name="sex" class="form-control" style="height: 48px;width: 300px">
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>联系方式：</label>
+                                <input id="shopPhone" name="phone" class="form-control" style="width: 300px;height: 48px">
+                            </div>
+                            <div class="form-group">
+                                <label>店铺地址：</label>
+                                <input id="shopAddress" name="address" class="form-control" style="width: 300px;height: 48px">
+                            </div>
+                            <input type="hidden" id="shopId" name="id">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" style="width: 300px;height: 48px;margin-right: 136px" v-on:click="updateShopAction()">
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--修改顾客模态框-->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">修改顾客信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="updateCustomerForm">
+                            <fieldset>
+                                <input type="hidden" name="id" id="customer_id">
+                                <div class="form-group">
+                                    <label>名称：</label>
+                                    <input readonly="readonly" name="customer_name" id="customer_name2" type="text" class="form-control" placeholder="name" style="width: 300px;height: 48px">
+                                </div>
+                                <div class="form-group">
+                                    <label>电话：</label>
+                                    <input readonly="readonly" name="phone" type="text" class="form-control"  placeholder="phone" id="customer_phone2" style="width: 300px;height: 48px">
+                                </div>
+                                <div class="form-group">
+                                    <label>会员等级：</label>
+                                    <select name="membership" type="email" id="membership2"  class="form-control" style=" width: 300px;height: 48px;">
+                                        <option value="1">NOT VIP</option>
+                                        <option value="0.9">VIP</option>
+                                        <option value="0.85">HVIP</option>
+                                        <option value="0.8">SVIP</option>
+                                    </select>
+                                </div>
+                            </fieldset>
+                        </form>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button id="updateUserBtn" type="button" class="btn btn-primary" v-on:click="submitUpdateCustomer(Ind)">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--订单详情页面-->
+        <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div style="max-width:960px" class="modal-dialog" role="document">
+                <div class="modal-content" style="border-style: unset">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title text-light">订单详情</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" v-if="detail">
+                        <p>订单编号：{{detail.id}} &nbsp; &nbsp; &nbsp;交易时间：{{detail.date}}</p>
+                        <p>卖家：{{detail.master.username}} &nbsp; &nbsp; &nbsp;买家：{{detail.customer.name}}</p>
+
+                        <legend>订单商品：</legend>
+                        <div style="height:250px;overflow-y:scroll;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">商品名称</th>
+                                    <th scope="col">码数</th>
+                                    <th scope="col">数量</th>
+                                    <th scope="col">价格</th>
+                                </tr>
+                                </thead>
+                                <tbody style="overflow-y: scroll">
+                                <tr v-for="commodity in commodityList" style="text-align: center">
+                                    <th scope="row">
+                                        <img v-if="commodity.imgPath!=null" :src="commodity.imgPath" width="50" height="50">
+                                        <img v-else src="/commodity/noImg.jpg" width="50" height="50">
+                                        {{commodity.c_name}}
+                                    </th>
+                                    <th scope="row">{{commodity.size}}</th>
+                                    <th scope="row">{{commodity.quantity}}</th>
+                                    <td scope="row">{{commodity.price}}￥</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <legend>订单活动：</legend>
+                        <div style="height:250px;overflow-y:scroll;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">活动编号</th>
+                                    <th scope="col">活动内容</th>
+                                    <th scope="col">参与类型</th>
+                                    <th scope="col">参与季度</th>
+                                </tr>
+                                </thead>
+                                <tbody style="overflow-y: scroll">
+                                <tr v-for="activity in activityList" style="text-align: center">
+                                    <th scope="row">{{activity.id}}</th>
+                                    <th scope="row">
+                                <span v-if="activity.discount<1">{{activity.discount*100}}%
+                                    <span v-if="activity.overlay==1">可折上折 </span>
+                                </span>
+                                        <span v-else-if="activity.plan==2">
+                                    满&nbsp;{{Math.floor(activity.discount)}} &nbsp; 减 &nbsp;
+                                    {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),Math.floor(activity.discount))}}
+                                    <span v-if="activity.overlay==1">上不封顶</span>
+                                </span>
+                                        <span v-else-if="activity.plan==3">
+                                    满{{Math.floor(activity.discount)}} &nbsp;
+                                    {{NumberMul(NumberSub(activity.discount,Math.floor(activity.discount)),100)}}%
+                                    <span v-if="activity.overlay==1">可折上折 </span>
+                                </span>
+                                    </th>
+                                    <th scope="row">
+                                        <select v-if="activity.typeJson" multiple="" class="form-control" style="width: 80px;height: 30px">
+                                            <option v-for="t in activity.typeJson">{{t}}</option>
+                                        </select>
+                                        <span v-else>全部类型</span>
+                                    </th>
+                                    <th scope="row">
+                                        <select v-if="activity.seasonJson" multiple="" class="form-control" style="width: 80px;height: 30px">
+                                            <option v-for="s in activity.seasonJson">{{s}}</option>
+                                        </select>
+                                        <span v-else>全部季度</span>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer" v-if="detail">
+                        <p style="float: right">订单原价：{{detail_price}}</p><br>
+                        <p style="float: right" class="text-danger">
+                            优惠:
+                            <span v-if="detail.price==detail_price">无</span>
+                            <span v-else>
+                            {{NumberSub(detail_price,detail.price)}}
+                        </span>
+                        </p><br>
+                        <p><hr></p><br>
+                        <p style="float: right" class="text-info">实际价格：{{detail.price}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--商品库存页面-->
+        <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div style="max-width:960px" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="color: white;background-color: #8a58d6">
+                        <h5 class="modal-title">商品库存</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" v-if="commodityInfo">
+                        <div style="height:250px;overflow-y:scroll;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">店铺</th>
+                                    <th scope="col">总库存</th>
+                                    <th scope="col">S</th>
+                                    <th scope="col">M</th>
+                                    <th scope="col">L</th>
+                                </tr>
+                                </thead>
+                                <tbody style="overflow-y: scroll">
+                                <tr v-for=" info in commodityInfo " style="text-align: center">
+                                    <th scope="row">{{info.shopName}}</th>
+                                    <th scope="row">{{NumberAdd(info.s,NumberAdd(info.m,info.l))}}</th>
+                                    <th scope="row">{{info.s}}</th>
+                                    <td scope="row">{{info.m}}</td>
+                                    <td scope="row">{{info.l}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer" v-if="commodityInfo">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--修改商品信息-->
+        <div class="modal fade" id="myModal6" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div style="max-width:600px" class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="color: white;background-color: #8a58d6">
+                        <h5 class="modal-title">修改商品信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="text-align: center">
+                        <form id="updateCommodityForm" style="text-align: left;display: inline-grid">
+                            <div class="form-group">
+                                <label>商品名称:</label>
+                                <input type="text" id="update_comName" class="form-control" style="width: 300px;height: 48px" name="c_name">
+                            </div>
+                            <div class="form-group">
+                                <label>商品价格:</label>
+                                <input type="text" id="update_comPrice" class="form-control" style="width: 300px;height: 48px" name="price">
+                            </div>
+                            <div class="form-group">
+                                <label>商品类型：</label>
+                                <select id="update_comType" class="form-control" style="height: 48px;width: 300px" name="type">
+                                    <option v-for="t in activity_typeList">{{t}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>上架季度：</label>
+                                <select id="update_comSeason" class="form-control" style="height: 48px;width: 300px" name="season">
+                                    <option v-for="season in activity_seasonList">{{season}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>更改图片：</label>
+                                <input type="file" class="form-control-file" aria-describedby="fileHelp" name="file" @change="getFile($event)">
+                            </div>
+                            <input type="hidden" id="update_comId" name="id">
+                            <input type="hidden" name="imgPath" id="update_Path">
+                            <div class="form-group">
+                                <button type="button" style="width:300px;height: 48px;" class="btn btn-primary" v-on:click="updateCommodityAction()">
+                                    提交
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+</body>
+
+<script type="text/javascript" th:src="@{/js/user.js}"></script>
+</html>
